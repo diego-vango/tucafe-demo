@@ -26,10 +26,7 @@ export function calculateFormatPrice(product: Product, format: WeightFormat): nu
   return product.price;
 }
 
-// URL por defecto priorizando la Variable de Entorno de Cloudflare
-export const DEFAULT_SHEET_CSV_URL = 
-  process.env.NEXT_PUBLIC_PRODUCTS_CSV_URL || 
-  'https://docs.google.com/spreadsheets/d/e/2PACX-1vS-5wO1sN9iEcY3JWuvFfdj7QYcecFo_WggRXtONNGe0kJ0BqWn8l0A2ZVc4GKsyyUSqJ5tOAZzYfQi/pub?gid=0&single=true&output=csv';
+export const DEFAULT_SHEET_CSV_URL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vS-5wO1sN9iEcY3JWuvFfdj7QYcecFo_WggRXtONNGe0kJ0BqWn8l0A2ZVc4GKsyyUSqJ5tOAZzYfQi/pub?gid=0&single=true&output=csv';
 
 /**
  * Robust CSV Line Parser that handles quotes and line breaks
@@ -86,10 +83,7 @@ export async function fetchCatalogFromCsv(csvUrl?: string): Promise<Product[]> {
   const targetUrl = (csvUrl && csvUrl.trim()) ? csvUrl.trim() : DEFAULT_SHEET_CSV_URL;
 
   try {
-    const response = await fetch(targetUrl, { 
-      cache: 'no-store',
-      headers: { 'Pragma': 'no-cache' }
-    });
+    const response = await fetch(targetUrl, { cache: 'no-store' });
     if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
     const text = await response.text();
     
@@ -111,7 +105,7 @@ export async function fetchCatalogFromCsv(csvUrl?: string): Promise<Product[]> {
 
       const rawId = row['id'] || row['codigo'] || `prod-${i}`;
       const name = row['nombre'] || row['title'] || row['producto'] || row['name'] || `Café ${i}`;
-      if (!name || (name === `Café ${i}` && !row['nombre'])) {
+      if (!name || name === `Café ${i}` && !row['nombre']) {
         if (!values.some(v => v.trim().length > 0)) continue;
       }
 
@@ -126,7 +120,7 @@ export async function fetchCatalogFromCsv(csvUrl?: string): Promise<Product[]> {
       const price500g = parsePrice(row['precio_500g'] || row['precio_500']);
       const price1kg = parsePrice(row['precio_1kg'] || row['precio_1000g'] || row['precio_1k']);
 
-      // Base display price
+      // Base display price (precio_250g or first available price)
       const basePrice = price250g || price500g || price1kg || 10000;
 
       const description = row['descripcion'] || row['description'] || 'Café de especialidad tostado artesanalmente en La Serena.';
@@ -147,15 +141,13 @@ export async function fetchCatalogFromCsv(csvUrl?: string): Promise<Product[]> {
       const images = Array.from(new Set(rawImgList));
       const mainImage = images[0] || 'https://images.unsplash.com/photo-1559056199-641a0ac8b55e?q=80&w=800';
 
-      // Category handling tolerante a variantes ("cafe", "origen", "café de origen")
+      // Category handling
       const rawCategory = (row['categoria'] || row['category'] || 'cafe').toLowerCase();
-      let category: ProductCategory = 'cafe';
+      let category: ProductCategory = rawCategory || 'cafe';
       if (rawCategory.includes('pack')) {
         category = 'packs';
       } else if (rawCategory.includes('mayor') || rawCategory.includes('pormayor')) {
         category = 'pormayor';
-      } else if (rawCategory.includes('origen') || rawCategory.includes('cafe') || rawCategory.includes('café')) {
-        category = 'cafe';
       }
 
       // Stock handling

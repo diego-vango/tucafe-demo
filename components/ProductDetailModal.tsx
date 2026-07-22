@@ -245,17 +245,24 @@ export default function ProductDetailModal({
             </div>
 
             {/* Stock status indicator */}
-            <div className="flex items-center gap-2 mb-2">
+            <div className="flex flex-col gap-1 mb-2">
               {isAgotado ? (
-                <span className="text-xs text-red-600 font-bold flex items-center gap-1 bg-red-50 px-2.5 py-1 rounded-lg border border-red-200">
+                <span className="text-xs text-red-600 font-bold flex items-center gap-1 bg-red-50 px-2.5 py-1 rounded-lg border border-red-200 w-fit">
                   <AlertCircle className="w-3.5 h-3.5" />
                   <span>Sin stock disponible temporalmente</span>
                 </span>
               ) : (
-                <span className="text-xs text-emerald-700 font-medium flex items-center gap-1 bg-emerald-50 px-2.5 py-1 rounded-lg border border-emerald-200">
-                  <Check className="w-3.5 h-3.5" />
-                  <span>Disponible para tostado y envío inmediato</span>
-                </span>
+                <div className="flex flex-wrap items-center gap-2">
+                  <span className="text-xs text-emerald-700 font-medium flex items-center gap-1 bg-emerald-50 px-2.5 py-1 rounded-lg border border-emerald-200">
+                    <Check className="w-3.5 h-3.5" />
+                    <span>Disponible para tostado y envío inmediato</span>
+                  </span>
+                  {product.stock > 0 && (
+                    <span className="text-xs text-emerald-800 font-bold bg-emerald-100/80 px-2.5 py-1 rounded-lg border border-emerald-300">
+                      Stock: {product.stock} unidades
+                    </span>
+                  )}
+                </div>
               )}
             </div>
 

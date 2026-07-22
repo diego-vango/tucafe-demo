@@ -152,6 +152,13 @@ export default function ProductCard({ product, onAddToCart, onOpenDetail }: Prod
             </span>
           </div>
 
+          {/* Stock Display */}
+          {product.stock > 0 && (
+            <p className="text-[11px] font-semibold text-emerald-700 mt-1">
+              Stock: {product.stock} unidades
+            </p>
+          )}
+
           {/* Description */}
           <p className="mt-2.5 text-xs text-gray-600 line-clamp-2 leading-relaxed">
             {product.description}

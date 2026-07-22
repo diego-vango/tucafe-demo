@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useState } from 'react';
-import { ShoppingBag, Search, Coffee, Settings, Menu, X, Phone } from 'lucide-react';
+import { ShoppingBag, Search, Coffee, Menu, X, Phone } from 'lucide-react';
 import { ProductCategory } from '@/types/coffee';
 
 interface HeaderProps {
@@ -11,7 +11,7 @@ interface HeaderProps {
   onSearchChange: (query: string) => void;
   cartCount: number;
   onOpenCart: () => void;
-  onOpenConfig: () => void;
+  onOpenConfig?: () => void;
 }
 
 export default function Header({
@@ -21,7 +21,6 @@ export default function Header({
   onSearchChange,
   cartCount,
   onOpenCart,
-  onOpenConfig,
 }: HeaderProps) {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 
@@ -91,16 +90,6 @@ export default function Header({
 
           {/* Header Action Buttons */}
           <div className="flex items-center gap-2 sm:gap-3">
-            {/* Sheet Config Button */}
-            <button
-              onClick={onOpenConfig}
-              title="Configurar origen de datos Google Sheets CSV"
-              className="p-2.5 text-[#2C1A1D] hover:bg-[#2C1A1D]/5 rounded-xl border border-[#2C1A1D]/10 transition-colors flex items-center gap-1.5 text-xs font-medium"
-            >
-              <Settings className="w-4 h-4 text-[#D4A373]" />
-              <span className="hidden lg:inline">CSV Sheet</span>
-            </button>
-
             {/* Direct WhatsApp Call */}
             <a
               href="https://wa.me/56945492046"

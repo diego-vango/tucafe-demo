@@ -142,12 +142,16 @@ export async function fetchCatalogFromCsv(csvUrl?: string): Promise<Product[]> {
       const mainImage = images[0] || 'https://images.unsplash.com/photo-1559056199-641a0ac8b55e?q=80&w=800';
 
       // Category handling
-      const rawCategory = (row['categoria'] || row['category'] || 'cafe').toLowerCase();
-      let category: ProductCategory = rawCategory || 'cafe';
+      const rawCategory = (row['categoria'] || row['category'] || 'cafe').toLowerCase().trim();
+      let category: ProductCategory = 'cafe';
       if (rawCategory.includes('pack')) {
         category = 'packs';
-      } else if (rawCategory.includes('mayor') || rawCategory.includes('pormayor')) {
+      } else if (rawCategory.includes('mayor') || rawCategory.includes('pormayor') || rawCategory.includes('granel')) {
         category = 'pormayor';
+      } else if (rawCategory.includes('origen') || rawCategory.includes('cafe') || rawCategory.includes('café')) {
+        category = 'cafe';
+      } else {
+        category = rawCategory || 'cafe';
       }
 
       // Stock handling

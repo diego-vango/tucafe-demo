@@ -1,34 +1,34 @@
 'use client';
 
 import React from 'react';
-import { HelpCircle, Coffee, CheckCircle2 } from 'lucide-react';
+import { HelpCircle, Coffee, CheckCircle2, Filter, Package, Clock } from 'lucide-react';
 
 export default function GrindGuide() {
   const grinds = [
     {
       title: 'En Grano Entero',
-      icon: '🫘',
+      icon: <Package className="w-6 h-6 text-[#2C1A1D]" />,
       idealFor: 'Molinillo manual o automático en casa',
       desc: 'Mantiene el 100% de los aceites aromáticos intactos. Moler justo antes de extraer garantiza la máxima intensidad sensorial.',
       tag: 'Máxima Frescura'
     },
     {
       title: 'Molienda Fina (Espresso)',
-      icon: '☕',
+      icon: <Coffee className="w-6 h-6 text-[#C85A32]" />,
       idealFor: 'Máquinas de Espresso & Aeropress rápida',
       desc: 'Textura similar a la sal fina. Permite una extracción rápida bajo presión con crema densa e intensa.',
       tag: 'Alta Presión'
     },
     {
       title: 'Molienda Media (Filtro / Moka)',
-      icon: '🧪',
+      icon: <Filter className="w-6 h-6 text-[#D4A373]" />,
       idealFor: 'V60, Chemex, Cafetera de Goteo & Cafetera Italiana (Moka)',
       desc: 'Textura como sal de mesa. Equilibrio perfecto para extracciones de goteo manual y cafeteras italianas.',
       tag: 'El Más Versátil'
     },
     {
       title: 'Molienda Gruesa (Prensa / Cold Brew)',
-      icon: '🫖',
+      icon: <Clock className="w-6 h-6 text-[#2C1A1D]" />,
       idealFor: 'Prensa Francesa (French Press) & Maceración en Frío (Cold Brew)',
       desc: 'Textura como pimienta o sal gruesa. Evita residuos en la taza durante infusiones prolongadas.',
       tag: 'Infusión Lenta'
@@ -60,7 +60,9 @@ export default function GrindGuide() {
             >
               <div>
                 <div className="flex items-center justify-between mb-3">
-                  <span className="text-3xl">{item.icon}</span>
+                  <div className="p-2.5 bg-stone-50 border border-stone-200 rounded-xl">
+                    {item.icon}
+                  </div>
                   <span className="text-[10px] font-extrabold uppercase px-2 py-0.5 rounded-full bg-[#FAF8F5] text-[#C85A32] border border-[#C85A32]/20">
                     {item.tag}
                   </span>

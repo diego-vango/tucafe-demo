@@ -26,7 +26,7 @@ export default function Catalog({
 
   const categories: { id: ProductCategory | 'todos'; label: string; count: number }[] = [
     { id: 'todos', label: 'Todos los Productos', count: products.length },
-    { id: 'cafe', label: '☕ Café de Origen', count: products.filter(p => p.category === 'cafe').length },
+    { id: 'cafe', label: '☕ Café de Origen', count: products.filter(p => p.category === 'cafe' || p.category === 'origen').length },
     { id: 'packs', label: '🏷️ Packs en Oferta', count: products.filter(p => p.category === 'packs').length },
     { id: 'pormayor', label: '📦 Por Mayor / Granel', count: products.filter(p => p.category === 'pormayor').length },
   ];
@@ -36,7 +36,11 @@ export default function Catalog({
 
     // Category filter
     if (activeCategory !== 'todos' && activeCategory !== 'contacto') {
-      result = result.filter(p => p.category === activeCategory);
+      if (activeCategory === 'cafe') {
+        result = result.filter(p => p.category === 'cafe' || p.category === 'origen');
+      } else {
+        result = result.filter(p => p.category === activeCategory);
+      }
     }
 
     // Search filter

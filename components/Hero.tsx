@@ -1,13 +1,18 @@
 'use client';
 
 import React from 'react';
-import { ShoppingCart, MessageCircle, Flame, ShieldCheck, MapPin, Award } from 'lucide-react';
+import { ShoppingCart, MessageCircle, Flame, ShieldCheck, MapPin, Award, Coffee } from 'lucide-react';
+import { Product } from '@/types/coffee';
 
 interface HeroProps {
   onExploreClick: () => void;
+  featuredProduct?: Product | null;
+  onOpenDetail?: (product: Product) => void;
 }
 
-export default function Hero({ onExploreClick }: HeroProps) {
+export default function Hero({ onExploreClick, featuredProduct, onOpenDetail }: HeroProps) {
+  const displayPrice = featuredProduct ? (featuredProduct.price250g || featuredProduct.price) : 0;
+
   return (
     <section className="relative bg-[#2C1A1D] text-[#FAF8F5] overflow-hidden py-16 md:py-24 shadow-xl">
       {/* Background Image & Dot Pattern Overlay */}
@@ -84,38 +89,69 @@ export default function Hero({ onExploreClick }: HeroProps) {
 
           {/* Hero Feature Card Showcase */}
           <div className="lg:col-span-5 relative">
-            <div className="relative mx-auto max-w-sm rounded-3xl overflow-hidden border-2 border-[#D4A373]/30 bg-[#2C1A1D]/80 backdrop-blur-md p-5 shadow-2xl">
-              
-              <div className="relative h-64 rounded-2xl overflow-hidden mb-4">
-                <img
-                  src="https://images.unsplash.com/photo-1514432324607-a09d9b4aefdd?q=80&w=800&auto=format&fit=crop"
-                  alt="Café Ruanda Super Premium"
-                  className="w-full h-full object-cover"
-                />
-                <div className="absolute top-3 left-3 bg-[#D4A373] text-[#2C1A1D] px-3 py-1 rounded-full text-xs font-black tracking-wide shadow-md">
-                  ★ DESTACADO DE LA SEMANA
+            {featuredProduct ? (
+              <div
+                onClick={() => onOpenDetail && onOpenDetail(featuredProduct)}
+                className="relative mx-auto max-w-sm rounded-3xl overflow-hidden border-2 border-[#D4A373]/30 bg-[#2C1A1D]/80 backdrop-blur-md p-5 shadow-2xl group cursor-pointer hover:border-[#D4A373]/60 transition-all"
+              >
+                <div className="relative h-64 rounded-2xl overflow-hidden mb-4 bg-stone-800">
+                  <img
+                    src={featuredProduct.image}
+                    alt={featuredProduct.name}
+                    className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+                  />
+                  <div className="absolute top-3 left-3 bg-[#D4A373] text-[#2C1A1D] px-3 py-1 rounded-full text-[11px] font-black tracking-wide shadow-md">
+                    ★ DESTACADO DE LA SEMANA
+                  </div>
+                  {featuredProduct.scaScore && (
+                    <div className="absolute bottom-3 right-3 bg-black/75 backdrop-blur-xs text-amber-300 px-2.5 py-1 rounded-lg text-xs font-bold border border-amber-300/20">
+                      {featuredProduct.scaScore} Pts SCA
+                    </div>
+                  )}
                 </div>
-                <div className="absolute bottom-3 right-3 bg-black/70 backdrop-blur-xs text-amber-300 px-2.5 py-1 rounded-lg text-xs font-bold">
-                  86 Pts SCA
+
+                <div className="space-y-2 text-left">
+                  <div className="flex items-center justify-between">
+                    <span className="text-xs font-bold text-[#D4A373] uppercase tracking-wider flex items-center gap-1">
+                      {featuredProduct.flag && <span>{featuredProduct.flag}</span>}
+                      <span>{featuredProduct.origin || 'Origen Selección'}</span>
+                    </span>
+                    <span className="text-lg font-black text-white">
+                      ${displayPrice.toLocaleString('es-CL')} CLP
+                    </span>
+                  </div>
+                  <h3 className="text-lg font-extrabold text-white leading-tight line-clamp-1">
+                    {featuredProduct.name}
+                  </h3>
+                  <p className="text-xs text-gray-300 line-clamp-2">
+                    {featuredProduct.notes && featuredProduct.notes.length > 0
+                      ? `Notas: ${featuredProduct.notes.join(', ')}`
+                      : featuredProduct.description}
+                  </p>
+                  <button
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      if (onOpenDetail) {
+                        onOpenDetail(featuredProduct);
+                      } else {
+                        onExploreClick();
+                      }
+                    }}
+                    className="w-full mt-2 py-2.5 bg-white/10 hover:bg-[#D4A373] hover:text-[#2C1A1D] text-[#D4A373] border border-[#D4A373]/40 text-xs font-bold rounded-xl transition-all text-center flex items-center justify-center gap-2 cursor-pointer shadow-md"
+                  >
+                    <Coffee className="w-4 h-4" />
+                    <span>Personalizar Molienda & Comprar</span>
+                  </button>
                 </div>
               </div>
-
-              <div className="space-y-2 text-left">
-                <div className="flex items-center justify-between">
-                  <span className="text-xs font-bold text-[#D4A373] uppercase tracking-wider">🇷🇼 Ruanda • Finca Huye</span>
-                  <span className="text-lg font-black text-white">$12.400 CLP</span>
-                </div>
-                <h3 className="text-lg font-extrabold text-white">Café Ruanda Super Premium</h3>
-                <p className="text-xs text-gray-300">Notas a flores blancas, ciruela fresca y té negro. Ideal para V60 y Chemex.</p>
-                <button
-                  onClick={onExploreClick}
-                  className="w-full mt-2 py-2.5 bg-white/10 hover:bg-white/20 text-[#D4A373] border border-[#D4A373]/30 text-xs font-bold rounded-xl transition-all text-center"
-                >
-                  Personalizar Molienda & Comprar
-                </button>
+            ) : (
+              <div className="relative mx-auto max-w-sm rounded-3xl overflow-hidden border border-white/10 bg-white/5 p-5 animate-pulse space-y-4">
+                <div className="h-64 rounded-2xl bg-white/10"></div>
+                <div className="h-4 bg-white/10 rounded-sm w-3/4"></div>
+                <div className="h-3 bg-white/10 rounded-sm w-1/2"></div>
+                <div className="h-10 bg-white/10 rounded-xl w-full"></div>
               </div>
-
-            </div>
+            )}
           </div>
 
         </div>

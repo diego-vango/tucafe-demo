@@ -188,6 +188,8 @@ export default function HomePage() {
 
       {/* Hero Section */}
       <Hero
+        featuredProduct={products[0] || null}
+        onOpenDetail={(product) => setSelectedDetailProduct(product)}
         onExploreClick={() => {
           setActiveCategory('todos');
           const catalogEl = document.getElementById('catalog-section');

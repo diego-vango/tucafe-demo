@@ -14,11 +14,18 @@ export default function ContactSection() {
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
+    const messageText = `Hola Tostaduría, soy ${formData.name} (${formData.email}${formData.phone ? `, Tel: ${formData.phone}` : ''}). Mi consulta: ${formData.message}`;
+    const whatsappUrl = `https://wa.me/56945492046?text=${encodeURIComponent(messageText)}`;
+    
+    if (typeof window !== 'undefined') {
+      window.open(whatsappUrl, '_blank');
+    }
+
     setSentSuccess(true);
     setTimeout(() => {
       setSentSuccess(false);
       setFormData({ name: '', email: '', phone: '', message: '' });
-    }, 4000);
+    }, 5000);
   };
 
   return (

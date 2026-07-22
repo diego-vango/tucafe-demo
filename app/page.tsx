@@ -12,6 +12,7 @@ import ContactSection from '@/components/ContactSection';
 import Footer from '@/components/Footer';
 import CartDrawer from '@/components/CartDrawer';
 import ConfigModal from '@/components/ConfigModal';
+import ProductDetailModal from '@/components/ProductDetailModal';
 import FloatingWhatsapp from '@/components/FloatingWhatsapp';
 
 function subscribeLocalStorage(callback: () => void) {
@@ -85,6 +86,7 @@ export default function HomePage() {
 
   const [isCartOpen, setIsCartOpen] = useState(false);
   const [isConfigOpen, setIsConfigOpen] = useState(false);
+  const [selectedDetailProduct, setSelectedDetailProduct] = useState<Product | null>(null);
   const [toastMessage, setToastMessage] = useState<string | null>(null);
 
   // Sync CSV catalog from Google Sheets or custom URL on mount and updates
@@ -100,7 +102,7 @@ export default function HomePage() {
   };
 
   // Add item to cart
-  const handleAddToCart = (product: Product, grind: GrindType, format: WeightFormat, unitPrice: number) => {
+  const handleAddToCart = (product: Product, grind: string, format: WeightFormat, unitPrice: number) => {
     const cartItemId = `${product.id}-${grind}-${format}`;
     
     updateCartItems((prev) => {
@@ -201,6 +203,7 @@ export default function HomePage() {
           onSelectCategory={setActiveCategory}
           searchQuery={searchQuery}
           onAddToCart={handleAddToCart}
+          onOpenDetail={(product) => setSelectedDetailProduct(product)}
         />
 
         {/* Coffee Grind Guide */}
@@ -212,6 +215,14 @@ export default function HomePage() {
 
       {/* Footer */}
       <Footer />
+
+      {/* Product Detail Modal */}
+      <ProductDetailModal
+        product={selectedDetailProduct}
+        isOpen={!!selectedDetailProduct}
+        onClose={() => setSelectedDetailProduct(null)}
+        onAddToCart={handleAddToCart}
+      />
 
       {/* Slide-over Cart Drawer */}
       <CartDrawer

@@ -1,29 +1,40 @@
 'use client';
 
 import React, { useState } from 'react';
-import { ShoppingCart, MessageCircle, Award, Check, Images } from 'lucide-react';
-import { Product, GrindType, WeightFormat } from '@/types/coffee';
-import { GRIND_OPTIONS, calculateFormatPrice } from '@/lib/data';
+import { ShoppingCart, MessageCircle, Award, Check, Images, Eye } from 'lucide-react';
+import { Product, WeightFormat } from '@/types/coffee';
+import { calculateFormatPrice } from '@/lib/data';
 
 interface ProductCardProps {
   product: Product;
-  onAddToCart: (product: Product, grind: GrindType, format: WeightFormat, price: number) => void;
+  onAddToCart: (product: Product, grind: string, format: WeightFormat, price: number) => void;
+  onOpenDetail?: (product: Product) => void;
 }
 
-export default function ProductCard({ product, onAddToCart }: ProductCardProps) {
-  const [selectedGrind, setSelectedGrind] = useState<GrindType>('En Grano');
-  const [selectedFormat, setSelectedFormat] = useState<WeightFormat>(
-    product.availableFormats && product.availableFormats.length > 0 ? product.availableFormats[0] : '250g'
-  );
+export default function ProductCard({ product, onAddToCart, onOpenDetail }: ProductCardProps) {
+  const initialFormat = product.availableFormats && product.availableFormats.length > 0
+    ? product.availableFormats[0]
+    : '250g';
+  const [selectedFormat, setSelectedFormat] = useState<WeightFormat>(initialFormat);
+
+  const initialGrind = product.moliendasDisponibles && product.moliendasDisponibles.length > 0
+    ? product.moliendasDisponibles[0]
+    : 'En Grano';
+  const [selectedGrind, setSelectedGrind] = useState<string>(initialGrind);
+
   const [addedAnimation, setAddedAnimation] = useState(false);
   
   // Multi-photo gallery state
   const productImages = (product.images && product.images.length > 0) ? product.images : [product.image];
   const [activeImageIdx, setActiveImageIdx] = useState(0);
 
+  const isAgotado = product.stock <= 0;
   const currentPrice = calculateFormatPrice(product, selectedFormat);
+  const displayLowestPrice = product.price250g || product.price;
 
-  const handleAddToCart = () => {
+  const handleAddToCart = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    if (isAgotado) return;
     onAddToCart(product, selectedGrind, selectedFormat, currentPrice);
     setAddedAnimation(true);
     setTimeout(() => setAddedAnimation(false), 1200);
@@ -37,33 +48,38 @@ export default function ProductCard({ product, onAddToCart }: ProductCardProps) 
   const currentImage = productImages[activeImageIdx] || product.image;
 
   return (
-    <div className="bg-white rounded-2xl overflow-hidden border border-[#2C1A1D]/10 shadow-xs hover:shadow-xl transition-all duration-300 flex flex-col justify-between group">
+    <div
+      onClick={() => onOpenDetail && onOpenDetail(product)}
+      className="bg-white rounded-2xl overflow-hidden border border-[#2C1A1D]/10 shadow-xs hover:shadow-xl transition-all duration-300 flex flex-col justify-between group cursor-pointer"
+    >
       
       {/* Top Image Section */}
       <div className="relative h-60 overflow-hidden bg-stone-100">
         <img
           src={currentImage}
           alt={product.name}
-          className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500 cursor-pointer"
+          className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
           loading="lazy"
-          onClick={() => {
-            if (productImages.length > 1) {
-              setActiveImageIdx((prev) => (prev + 1) % productImages.length);
-            }
-          }}
         />
 
         {/* Badge Overlay */}
         <div className="absolute top-3 left-3 flex flex-col gap-1.5 items-start z-10">
-          {product.badge && (
+          {isAgotado ? (
+            <span className="bg-red-600 text-white text-[11px] font-extrabold px-3 py-1 rounded-lg uppercase tracking-wider shadow-md">
+              Agotado
+            </span>
+          ) : product.badge ? (
             <span className="bg-[#C85A32] text-white text-[11px] font-extrabold px-2.5 py-1 rounded-lg uppercase tracking-wider shadow-md">
               {product.badge}
             </span>
+          ) : null}
+
+          {(product.flag || product.origin) && (
+            <span className="bg-[#2C1A1D]/90 text-[#FAF8F5] text-xs font-bold px-2.5 py-1 rounded-lg backdrop-blur-xs flex items-center gap-1">
+              {product.flag && <span>{product.flag}</span>}
+              {product.origin && <span>{product.origin}</span>}
+            </span>
           )}
-          <span className="bg-[#2C1A1D]/90 text-[#FAF8F5] text-xs font-bold px-2.5 py-1 rounded-lg backdrop-blur-xs flex items-center gap-1">
-            <span>{product.flag}</span>
-            <span>{product.origin}</span>
-          </span>
         </div>
 
         {/* SCA Score Badge */}
@@ -110,26 +126,26 @@ export default function ProductCard({ product, onAddToCart }: ProductCardProps) 
         
         <div>
           {/* Title */}
-          <h3 className="font-bold text-lg text-[#2C1A1D] mb-1 group-hover:text-[#C85A32] transition-colors">
+          <h3 className="font-bold text-lg text-[#2C1A1D] mb-1 group-hover:text-[#C85A32] transition-colors line-clamp-1">
             {product.name}
           </h3>
 
           {/* Cupping Notes Line */}
-          <p className="text-xs text-[#2C1A1D]/60 italic mb-3">
-            Notas: {product.notes.join(', ')}
-          </p>
+          {product.notes && product.notes.length > 0 && (
+            <p className="text-xs text-[#2C1A1D]/60 italic mb-3">
+              Notas: {product.notes.join(', ')}
+            </p>
+          )}
 
-          {/* Price Header */}
+          {/* Price Header with "Desde" Prefix */}
           <div className="mt-1 flex items-baseline gap-2 justify-between">
-            <div className="flex items-baseline gap-2">
-              <span className="text-xl font-serif font-bold text-[#2C1A1D]">
-                ${currentPrice.toLocaleString('es-CL')}
+            <div className="flex items-baseline gap-1.5">
+              <span className="text-xs font-semibold text-[#2C1A1D]/60 uppercase tracking-tight">
+                Desde
               </span>
-              {product.originalPrice && selectedFormat === '250g' && (
-                <span className="text-xs text-[#2C1A1D]/40 line-through font-medium">
-                  ${product.originalPrice.toLocaleString('es-CL')}
-                </span>
-              )}
+              <span className="text-xl font-serif font-bold text-[#2C1A1D]">
+                ${displayLowestPrice.toLocaleString('es-CL')}
+              </span>
             </div>
             <span className="text-[10px] uppercase font-bold text-[#2C1A1D]/50 bg-[#FAF8F5] px-2 py-0.5 rounded border border-[#2C1A1D]/5">
               {selectedFormat}
@@ -143,13 +159,13 @@ export default function ProductCard({ product, onAddToCart }: ProductCardProps) 
         </div>
 
         {/* Selectors Section */}
-        <div className="space-y-3 pt-2 border-t border-gray-100">
+        <div className="space-y-3 pt-2 border-t border-gray-100" onClick={(e) => e.stopPropagation()}>
           
           {/* Format / Weight Selector */}
           {product.availableFormats && product.availableFormats.length > 1 && (
             <div>
               <label className="block text-[11px] font-bold text-gray-600 uppercase tracking-wider mb-1">
-                1. Formato / Peso:
+                Formato / Peso:
               </label>
               <div className="grid grid-cols-3 gap-1.5">
                 {product.availableFormats.map((fmt) => {
@@ -173,66 +189,78 @@ export default function ProductCard({ product, onAddToCart }: ProductCardProps) 
             </div>
           )}
 
-          {/* Grind Selector */}
+          {/* Grind Dropdown Selector */}
           <div>
             <label className="block text-[11px] font-bold text-gray-600 uppercase tracking-wider mb-1">
-              2. Tipo de Molienda:
+              Tipo de Molienda:
             </label>
-            <div className="grid grid-cols-2 gap-1.5">
-              {GRIND_OPTIONS.map((grind) => {
-                const isSelected = selectedGrind === grind.id;
-                return (
-                  <button
-                    key={grind.id}
-                    type="button"
-                    onClick={() => setSelectedGrind(grind.id)}
-                    className={`py-1.5 px-2 text-[11px] font-medium rounded-xl border transition-all text-left flex items-center gap-1.5 ${
-                      isSelected
-                        ? 'bg-[#D4A373]/20 border-[#D4A373] text-[#2C1A1D] font-bold ring-1 ring-[#D4A373]'
-                        : 'bg-white text-gray-600 border-gray-200 hover:border-gray-300'
-                    }`}
-                  >
-                    <span>{grind.icon}</span>
-                    <span className="truncate">{grind.label}</span>
-                  </button>
-                );
-              })}
-            </div>
+            <select
+              value={selectedGrind}
+              onChange={(e) => setSelectedGrind(e.target.value)}
+              className="w-full bg-white border border-gray-200 rounded-xl px-2.5 py-1.5 text-xs font-semibold text-[#2C1A1D] focus:outline-hidden focus:ring-2 focus:ring-[#D4A373]"
+            >
+              {product.moliendasDisponibles && product.moliendasDisponibles.length > 0 ? (
+                product.moliendasDisponibles.map((m) => (
+                  <option key={m} value={m}>
+                    {m}
+                  </option>
+                ))
+              ) : (
+                <option value="En Grano">En Grano</option>
+              )}
+            </select>
           </div>
 
         </div>
 
         {/* Action Buttons */}
-        <div className="pt-2 space-y-2">
-          <button
-            onClick={handleAddToCart}
-            className={`w-full py-3 px-4 rounded-xl font-bold text-sm transition-all flex items-center justify-center gap-2 shadow-sm ${
-              addedAnimation
-                ? 'bg-emerald-600 text-white'
-                : 'bg-[#2C1A1D] hover:bg-[#3d2529] text-[#FAF8F5]'
-            }`}
-          >
-            {addedAnimation ? (
-              <>
-                <Check className="w-4 h-4 text-white" />
-                <span>¡Añadido al Carrito!</span>
-              </>
-            ) : (
-              <>
-                <ShoppingCart className="w-4 h-4 text-[#D4A373]" />
-                <span>Añadir al Carrito</span>
-              </>
-            )}
-          </button>
+        <div className="pt-2 space-y-2" onClick={(e) => e.stopPropagation()}>
+          <div className="grid grid-cols-5 gap-1.5">
+            <button
+              type="button"
+              disabled={isAgotado}
+              onClick={handleAddToCart}
+              className={`col-span-4 py-3 px-3 rounded-xl font-bold text-xs transition-all flex items-center justify-center gap-1.5 shadow-sm ${
+                isAgotado
+                  ? 'bg-gray-200 text-gray-500 cursor-not-allowed border border-gray-300'
+                  : addedAnimation
+                  ? 'bg-emerald-600 text-white'
+                  : 'bg-[#2C1A1D] hover:bg-[#3d2529] text-[#FAF8F5]'
+              }`}
+            >
+              {isAgotado ? (
+                <span>Agotado</span>
+              ) : addedAnimation ? (
+                <>
+                  <Check className="w-4 h-4 text-white" />
+                  <span>¡Añadido!</span>
+                </>
+              ) : (
+                <>
+                  <ShoppingCart className="w-4 h-4 text-[#D4A373]" />
+                  <span>Añadir (${currentPrice.toLocaleString('es-CL')})</span>
+                </>
+              )}
+            </button>
+
+            <button
+              type="button"
+              onClick={() => onOpenDetail && onOpenDetail(product)}
+              className="col-span-1 bg-stone-100 hover:bg-stone-200 text-[#2C1A1D] border border-stone-200 rounded-xl flex items-center justify-center transition-colors"
+              title="Ver detalle del producto"
+            >
+              <Eye className="w-4 h-4 text-[#2C1A1D]" />
+            </button>
+          </div>
 
           <a
             href={buildWhatsappQueryUrl()}
             target="_blank"
             rel="noopener noreferrer"
-            className="w-full py-2 px-3 bg-stone-100 hover:bg-emerald-50 text-emerald-800 hover:text-emerald-900 border border-stone-200 hover:border-emerald-300 rounded-xl font-semibold text-xs transition-colors flex items-center justify-center gap-1.5"
+            className="w-full py-1.5 px-2 bg-stone-50 hover:bg-emerald-50 text-emerald-800 border border-stone-200 hover:border-emerald-300 rounded-xl font-semibold text-[11px] transition-colors flex items-center justify-center gap-1.5"
           >
             <MessageCircle className="w-3.5 h-3.5 text-emerald-600" />
-            <span>Consulta Rápida por WhatsApp</span>
+            <span>Consulta WhatsApp</span>
           </a>
         </div>
 
@@ -240,3 +268,4 @@ export default function ProductCard({ product, onAddToCart }: ProductCardProps) 
     </div>
   );
 }
+

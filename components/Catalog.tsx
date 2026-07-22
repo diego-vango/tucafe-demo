@@ -10,7 +10,8 @@ interface CatalogProps {
   activeCategory: ProductCategory | 'todos' | 'contacto';
   onSelectCategory: (category: ProductCategory | 'todos' | 'contacto') => void;
   searchQuery: string;
-  onAddToCart: (product: Product, grind: GrindType, format: WeightFormat, price: number) => void;
+  onAddToCart: (product: Product, grind: string, format: WeightFormat, price: number) => void;
+  onOpenDetail?: (product: Product) => void;
 }
 
 export default function Catalog({
@@ -19,6 +20,7 @@ export default function Catalog({
   onSelectCategory,
   searchQuery,
   onAddToCart,
+  onOpenDetail,
 }: CatalogProps) {
   const [sortBy, setSortBy] = useState<'featured' | 'price-low' | 'price-high' | 'sca'>('featured');
 
@@ -41,10 +43,10 @@ export default function Catalog({
     if (searchQuery.trim()) {
       const q = searchQuery.toLowerCase().trim();
       result = result.filter(p =>
-        p.name.toLowerCase().includes(q) ||
-        p.origin.toLowerCase().includes(q) ||
-        p.notes.some(n => n.toLowerCase().includes(q)) ||
-        p.description.toLowerCase().includes(q)
+        (p.name && p.name.toLowerCase().includes(q)) ||
+        (p.origin && p.origin.toLowerCase().includes(q)) ||
+        (p.notes && p.notes.some(n => n.toLowerCase().includes(q))) ||
+        (p.description && p.description.toLowerCase().includes(q))
       );
     }
 
@@ -147,22 +149,29 @@ export default function Catalog({
               key={product.id}
               product={product}
               onAddToCart={onAddToCart}
+              onOpenDetail={onOpenDetail}
             />
           ))}
         </div>
       ) : (
-        <div className="text-center py-16 bg-white rounded-3xl border border-gray-200 p-8 max-w-md mx-auto">
-          <Coffee className="w-12 h-12 text-[#D4A373] mx-auto mb-3" />
-          <h3 className="text-lg font-bold text-[#2C1A1D]">No encontramos productos</h3>
-          <p className="text-xs text-gray-500 mt-1">
-            Intenta buscando otro término o selecciona la categoría &quot;Todos los Productos&quot;.
+        <div className="text-center py-16 bg-white rounded-3xl border border-gray-200 p-8 max-w-md mx-auto shadow-xs">
+          <Coffee className="w-12 h-12 text-[#D4A373] mx-auto mb-3 animate-pulse" />
+          <h3 className="text-xl font-serif font-bold text-[#2C1A1D]">
+            {products.length === 0 ? 'Actualizando catálogo, vuelve pronto' : 'No encontramos productos'}
+          </h3>
+          <p className="text-xs text-gray-500 mt-2 leading-relaxed">
+            {products.length === 0
+              ? 'Estamos sincronizando el inventario de cafés tostados con la planilla oficial.'
+              : 'Intenta buscando otro término o selecciona la categoría "Todos los Productos".'}
           </p>
-          <button
-            onClick={() => onSelectCategory('todos')}
-            className="mt-4 px-5 py-2 bg-[#2C1A1D] text-[#D4A373] text-xs font-bold rounded-xl"
-          >
-            Ver Todo el Catálogo
-          </button>
+          {products.length > 0 && (
+            <button
+              onClick={() => onSelectCategory('todos')}
+              className="mt-4 px-5 py-2.5 bg-[#2C1A1D] hover:bg-[#3d2529] text-[#D4A373] text-xs font-bold rounded-xl transition-colors"
+            >
+              Ver Todo el Catálogo
+            </button>
+          )}
         </div>
       )}
 

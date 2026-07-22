@@ -1,0 +1,6 @@
+{
+  "name": "Tu Café en La Serena",
+  "description": "Tostaduría de Café de Especialidad en La Serena - Tienda en línea moderna con catálogo dinámico, selección de molienda y pedidos por WhatsApp",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
